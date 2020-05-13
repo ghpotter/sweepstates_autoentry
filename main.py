@@ -42,6 +42,7 @@ def get_entry_info(json_file_name):
 def main(params):
     email = params[0]
     website = params[1]
+    success = False
 
     opts = webdriver.ChromeOptions()
     opts.headless = True
@@ -59,21 +60,34 @@ def main(params):
         driver.find_element_by_id(website.login_element_id).click()
 
         for button in driver.find_elements_by_class_name(website.button_class):
-            print("Trying to click button")
+            # print("Trying to click button")
             try:
                 button.click()
-                print("+++success")
-                print("{0} on {1} succedded".format(email, website.website))
-                driver.close()
+                # print("+++success")
+                # print("{0} on {1} succedded".format(email, website.website))
+                success = True
             except:
-                print("failure")
+                # print("failure")
+                pass
     except Exception:
         print("{0} on {1} failed.".format(email, website.website))
         print(Exception)
     driver.quit()
+    return params, success
 
 if __name__ == '__main__':
     emails, websites = get_entry_info('entry_info.json')
     params = list(product(emails, websites))
 
-    Pool(4).map(main, params)
+    retry_count = 0
+    while params and retry_count < 5:
+        retry_count += 1
+        outs = Pool().map(main, params)
+        params = []
+        for out in outs:
+            if out[1]:
+                print('{0} succeeded on {1}'.format(out[0][0], out[0][1].website))
+            else:
+                print('{0} failed on {1} on attempt {2}'.format(out[0][0], out[0][1].website, retry_count))
+                params.append(out[0])
+        
