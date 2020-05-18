@@ -1,3 +1,5 @@
+import os
+
 from itertools import product
 from json import load
 from multiprocessing import Pool
@@ -76,7 +78,10 @@ def main(params):
     return params, success
 
 if __name__ == '__main__':
-    emails, websites = get_entry_info('entry_info.json')
+    script_dir = os.path.split(os.path.abspath(__file__))[0]
+    json_file = 'entry_info.json'
+    full_json_path = os.path.join(script_dir, json_file)
+    emails, websites = get_entry_info(full_json_path)
     params = list(product(emails, websites))
 
     retry_count = 0
