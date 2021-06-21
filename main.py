@@ -5,6 +5,7 @@ from json import load
 from multiprocessing import Pool
 from selenium import webdriver
 from time import sleep
+from webdriver_manager.chrome import ChromeDriverManager
 
 class WebSiteInfo:
     def __init__(self, website_json):
@@ -44,12 +45,13 @@ def get_entry_info(json_file_name):
 def main(params):
     email = params[0]
     website = params[1]
+    chromedriver_path = params[2]
     success = False
 
     opts = webdriver.ChromeOptions()
     opts.headless = True
     opts.add_argument('log-level=2')
-    driver = webdriver.Chrome(options=opts)
+    driver = webdriver.Chrome(executable_path=chromedriver_path, options=opts)
 
     try:
         driver.get(website.website)
@@ -71,9 +73,9 @@ def main(params):
             except:
                 # print("failure")
                 pass
-    except Exception:
+    except Exception as exception:
         print("{0} on {1} failed.".format(email, website.website))
-        print(Exception)
+        print(exception)
     driver.quit()
     return params, success
 
@@ -81,8 +83,9 @@ if __name__ == '__main__':
     script_dir = os.path.split(os.path.abspath(__file__))[0]
     json_file = 'entry_info.json'
     full_json_path = os.path.join(script_dir, json_file)
+    chromedriver_path = os.path.join(script_dir, "chromedriver.exe")
     emails, websites = get_entry_info(full_json_path)
-    params = list(product(emails, websites))
+    params = list(product(emails, websites, [chromedriver_path]))
 
     retry_count = 0
     while params and retry_count < 5:
