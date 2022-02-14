@@ -4,8 +4,7 @@ from itertools import product
 from json import load
 from multiprocessing import Pool
 from selenium import webdriver
-from time import sleep
-from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_autoinstaller
 
 class WebSiteInfo:
     def __init__(self, website_json):
@@ -47,6 +46,8 @@ def main(params):
     website = params[1]
     chromedriver_path = params[2]
     success = False
+
+    chromedriver_autoinstaller.install()
 
     opts = webdriver.ChromeOptions()
     opts.headless = True
